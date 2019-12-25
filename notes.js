@@ -5,17 +5,24 @@ const chalk = require('chalk');
 const danger = chalk.red;
 const success = chalk.green;
 
-const getNotes = function() {
-    return 'your notes...'
+const getNote = (title)=> {
+    const notes = loadNotes();
+    const note = notes.find((note) => note.title===title);
+
+    if(note) {
+        console.log(success.bold.inverse(note.title));
+        console.log(success.italic(note.body));
+    } else {
+        console.log(danger.bold.inverse(title) + ' not found!');
+    }
 }
 
 const addNote = function(title, body) {
     const notes = loadNotes();
-    const duplNote = notes.filter((note) => {
-        return note.title === title;
-    });
+    // const duplNotes = notes.filter((note) => note.title === title ); //=> will return the result
+    const duplNote = notes.find((note) => note.title === title);
 
-    if(duplNote.length === 0) {
+    if(!duplNote) {
         notes.push({
             title: title,
             body: body
@@ -28,7 +35,7 @@ const addNote = function(title, body) {
     
 }
 
-const remNote = function(title) {
+const remNote = (title) => {
     const notes = loadNotes();
     if(notes.length > 0) {
         const updatedNotes = notes.filter((note) => {
@@ -45,7 +52,21 @@ const remNote = function(title) {
     }
 }
 
-const loadNotes = function() {
+const listNotes = () => {
+    const notes = loadNotes(); 
+    if(notes.length > 0) {
+        console.log(success.bold.inverse('Your notes: '));
+        let count = 1;
+        notes.forEach(note => {
+            console.log(success(`${count} ${note.title}`));
+            count++;
+        });
+    } else {
+        console.log(danger.bold('Notes file is empty!')); 
+    }
+}
+
+const loadNotes = () => {
     try {
         const dataBuffer = fs.readFileSync('notes.json');
         const dataJson = dataBuffer.toString();
@@ -56,13 +77,15 @@ const loadNotes = function() {
     }
 }
 
-const saveNotes = function(notes) {
+const saveNotes = (notes) => {
     const jsonData = JSON.stringify(notes);
     fs.writeFileSync('notes.json', jsonData);
 }
 
+
 module.exports = {
-    getNotes: getNotes,
+    getNote: getNote,
     addNote: addNote,
-    remNote: remNote
+    remNote: remNote,
+    listNotes: listNotes
 }
